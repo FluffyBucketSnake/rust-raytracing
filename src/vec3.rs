@@ -8,6 +8,8 @@ pub struct Vec3 {
     pub e: [f32; 3],
 }
 
+pub type Point3 = Vec3;
+
 impl Vec3 {
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { e: [x, y, z] }
@@ -58,8 +60,13 @@ impl Vec3 {
     }
 
     #[inline]
-    pub fn lenght(&self) -> f32 {
+    pub fn lenght_squared(&self) -> f32 {
         self.dot(self)
+    }
+
+    #[inline]
+    pub fn lenght(&self) -> f32 {
+        self.dot(self).sqrt()
     }
 
     #[inline]
@@ -78,6 +85,7 @@ impl Display for Vec3 {
 impl Neg for Vec3 {
     type Output = Self;
 
+    #[inline]
     fn neg(self) -> Self::Output {
         Self::new(-self.x(), -self.y(), -self.z())
     }
@@ -88,6 +96,7 @@ macro_rules! impl_borrowed {
         impl $trait<&$rhs> for &$lhs {
             type Output = Vec3;
 
+            #[inline]
             fn $func(self, rhs: &$rhs) -> Self::Output {
                 $trait::$func(*self, *rhs)
             }
@@ -96,6 +105,7 @@ macro_rules! impl_borrowed {
         impl $trait<&$rhs> for $lhs {
             type Output = Vec3;
 
+            #[inline]
             fn $func(self, rhs: &$rhs) -> Self::Output {
                 $trait::$func(self, *rhs)
             }
@@ -104,6 +114,7 @@ macro_rules! impl_borrowed {
         impl $trait<$rhs> for &$lhs {
             type Output = Vec3;
 
+            #[inline]
             fn $func(self, rhs: $rhs) -> Self::Output {
                 $trait::$func(*self, rhs)
             }
@@ -116,6 +127,7 @@ macro_rules! impl_element_wise_op {
         impl $trait for Vec3 {
             type Output = Self;
 
+            #[inline]
             fn $func(self, rhs: Self) -> Self::Output {
                 Self::new(
                     $trait::$func(self.x(), rhs.x()),
@@ -129,6 +141,7 @@ macro_rules! impl_element_wise_op {
         impl $trait<f32> for Vec3 {
             type Output = Self;
 
+            #[inline]
             fn $func(self, rhs: f32) -> Self::Output {
                 Self::new(
                     $trait::$func(self.x(), rhs),
@@ -142,6 +155,7 @@ macro_rules! impl_element_wise_op {
         impl $trait<Vec3> for f32 {
             type Output = Vec3;
 
+            #[inline]
             fn $func(self, rhs: Vec3) -> Self::Output {
                 $trait::$func(rhs, self)
             }
@@ -158,6 +172,7 @@ impl_element_wise_op!(Div, div);
 macro_rules! impl_element_wise_op_assign {
     ($trait:ident, $func:ident) => {
         impl $trait for Vec3 {
+            #[inline]
             fn $func(&mut self, rhs: Self) {
                 $trait::$func(&mut self.e[0], rhs.e[0]);
                 $trait::$func(&mut self.e[1], rhs.e[1]);
@@ -171,4 +186,3 @@ impl_element_wise_op_assign!(AddAssign, add_assign);
 impl_element_wise_op_assign!(SubAssign, sub_assign);
 impl_element_wise_op_assign!(MulAssign, mul_assign);
 impl_element_wise_op_assign!(DivAssign, div_assign);
-

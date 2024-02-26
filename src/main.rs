@@ -50,9 +50,22 @@ fn main() -> RenderResult {
 }
 
 fn ray_color(ray: Ray) -> Color {
+    if hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, ray) {
+        return Color::new(1.0, 0.0, 0.0);
+    }
+
     let direction = ray.direction().unit();
     let a = 0.5 * (direction.y() + 1.0);
     (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
+}
+
+fn hit_sphere(center: Vec3, radius: f32, ray: Ray) -> bool {
+    let center_to_origin = ray.origin() - center;
+    let a = ray.direction().dot(&ray.direction());
+    let b = 2.0 * ray.direction().dot(&center_to_origin);
+    let c = center_to_origin.dot(&center_to_origin) - radius * radius;
+    let delta = b * b - 4.0 * a * c;
+    return delta >= 0.0;
 }
 
 fn write_ppm_header(output: &mut impl Write, width: usize, height: usize) -> RenderResult {

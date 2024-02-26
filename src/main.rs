@@ -1,6 +1,11 @@
+mod vec3;
+
 use std::error::Error;
 use std::io::Write;
 
+use vec3::Vec3;
+
+type Color = Vec3;
 type RenderResult = Result<(), Box<dyn Error>>;
 
 fn main() -> RenderResult {
@@ -11,10 +16,14 @@ fn main() -> RenderResult {
     write_ppm_header(output, IMAGE_WIDTH, IMAGE_HEIGHT)?;
     for i in 0..IMAGE_HEIGHT {
         for j in 0..IMAGE_WIDTH {
-            let r = ((i as f32 / (IMAGE_WIDTH - 1) as f32) * 256.0) as u8;
-            let g = ((j as f32 / (IMAGE_HEIGHT - 1) as f32) * 256.0) as u8;
-            let b = 0;
-            writeln!(output, "{} {} {}", r, g, b)?;
+            write_ppm_pixel(
+                output,
+                Color::new(
+                    j as f32 / (IMAGE_WIDTH - 1) as f32,
+                    i as f32 / (IMAGE_HEIGHT - 1) as f32,
+                    0.0,
+                ),
+            )?;
         }
         let _ = writeln!(log, "Scanline progress: {}/{}", i + 1, IMAGE_HEIGHT);
     }
@@ -26,5 +35,13 @@ fn write_ppm_header(output: &mut impl Write, width: usize, height: usize) -> Ren
     writeln!(output, "P3")?;
     writeln!(output, "{} {}", width, height)?;
     writeln!(output, "255")?;
+    Ok(())
+}
+
+fn write_ppm_pixel(output: &mut impl Write, color: Color) -> RenderResult {
+    let r = (color.r() * 256.0) as u8;
+    let g = (color.g() * 256.0) as u8;
+    let b = (color.b() * 256.0) as u8;
+    writeln!(output, "{} {} {}", r, g, b)?;
     Ok(())
 }

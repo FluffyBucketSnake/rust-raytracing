@@ -1,10 +1,16 @@
+mod hittable;
+mod hittable_list;
 mod ray;
+mod sphere;
 mod vec3;
 
 use std::error::Error;
 use std::io::Write;
 
+use hittable::Hittable;
+use hittable_list::HittableList;
 use ray::Ray;
+use sphere::Sphere;
 use vec3::{Point3, Vec3};
 
 type Color = Vec3;
@@ -30,6 +36,10 @@ fn main() -> RenderResult {
         camera_center - Vec3::new(0.0, 0.0, focal_length) - (viewport_u + viewport_v) / 2.0;
     let pixel_top_left = viewport_top_left + 0.5 * (viewport_du + viewport_dv);
 
+    let mut world = HittableList::new();
+    world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
+
     let log = &mut std::io::stderr();
     let output = &mut std::io::stdout();
 
@@ -38,9 +48,9 @@ fn main() -> RenderResult {
         for i in 0..image_width {
             let pixel_center = pixel_top_left + (i as f32) * viewport_du + (j as f32) * viewport_dv;
             let ray_direction = pixel_center - camera_center;
-            let ray = Ray::new(pixel_center, ray_direction);
+            let ray = Ray::new(camera_center, ray_direction);
 
-            let color = ray_color(ray);
+            let color = ray_color(ray, &world);
             write_ppm_pixel(output, color)?;
         }
         let _ = writeln!(log, "Scanline progress: {}/{}", j + 1, image_height);
@@ -49,23 +59,14 @@ fn main() -> RenderResult {
     Ok(())
 }
 
-fn ray_color(ray: Ray) -> Color {
-    if hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, ray) {
-        return Color::new(1.0, 0.0, 0.0);
+fn ray_color(ray: Ray, world: &HittableList) -> Color {
+    if let Some(hit) = world.hit(&ray, 0.0, f32::INFINITY) {
+        return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
     }
 
     let direction = ray.direction().unit();
     let a = 0.5 * (direction.y() + 1.0);
-    (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
-}
-
-fn hit_sphere(center: Vec3, radius: f32, ray: Ray) -> bool {
-    let center_to_origin = ray.origin() - center;
-    let a = ray.direction().dot(&ray.direction());
-    let b = 2.0 * ray.direction().dot(&center_to_origin);
-    let c = center_to_origin.dot(&center_to_origin) - radius * radius;
-    let delta = b * b - 4.0 * a * c;
-    return delta >= 0.0;
+    return (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0);
 }
 
 fn write_ppm_header(output: &mut impl Write, width: usize, height: usize) -> RenderResult {

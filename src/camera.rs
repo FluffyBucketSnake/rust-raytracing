@@ -1,13 +1,6 @@
 use std::{error::Error, io::Write};
 
-use crate::{
-    hittable::Hittable,
-    interval::Interval,
-    prelude::*,
-    ray::Ray,
-    vec3::{Point3, Vec3},
-    Color,
-};
+use crate::{hittable::Hittable, interval::Interval, prelude::*, Color};
 
 pub type RenderResult = Result<(), Box<dyn Error>>;
 
@@ -15,6 +8,7 @@ pub type RenderResult = Result<(), Box<dyn Error>>;
 pub struct Camera {
     image_width: usize,
     image_height: usize,
+    samples_pex_pixel: usize,
     center: Point3,
     top_left_pixel: Point3,
     pixel_du: Vec3,
@@ -22,7 +16,11 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn from_aspect_ratio(image_width: usize, aspect_ratio: float) -> Self {
+    pub fn from_aspect_ratio(
+        image_width: usize,
+        aspect_ratio: float,
+        samples_pex_pixel: usize,
+    ) -> Self {
         let center = Point3::new(0.0, 0.0, 0.0);
         let focal_length = 1.0;
 
@@ -44,6 +42,7 @@ impl Camera {
         Self {
             image_width,
             image_height,
+            samples_pex_pixel,
             center,
             top_left_pixel,
             pixel_du,
@@ -58,13 +57,10 @@ impl Camera {
         write_ppm_header(output, self.image_width, self.image_height)?;
         for j in 0..self.image_height {
             for i in 0..self.image_width {
-                let pixel_center = self.top_left_pixel
-                    + (i as float) * self.pixel_du
-                    + (j as float) * self.pixel_dv;
-                let ray_direction = pixel_center - self.center;
-                let ray = Ray::new(self.center, ray_direction);
-
-                let color = ray_color(&ray, world);
+                let color = (0..self.samples_pex_pixel)
+                    .map(|_| ray_color(&self.get_ray(i, j), world))
+                    .sum::<Color>()
+                    / (self.samples_pex_pixel as float);
                 write_ppm_pixel(output, color)?;
             }
             let _ = writeln!(log, "Scanline progress: {}/{}", j, self.image_height);
@@ -72,6 +68,20 @@ impl Camera {
         let _ = writeln!(log, "Done");
         output.flush()?;
         Ok(())
+    }
+
+    fn get_ray(&self, i: usize, j: usize) -> Ray {
+        let pixel_center =
+            self.top_left_pixel + (i as float) * self.pixel_du + (j as float) * self.pixel_dv;
+        let pixel_sample = pixel_center + self.get_pixel_sample_square();
+        let ray_direction = pixel_sample - self.center;
+        Ray::new(self.center, ray_direction)
+    }
+
+    fn get_pixel_sample_square(&self) -> Vec3 {
+        let px = -0.5 + rand_norm();
+        let py = -0.5 + rand_norm();
+        (px * self.pixel_du) + (py * self.pixel_dv)
     }
 }
 

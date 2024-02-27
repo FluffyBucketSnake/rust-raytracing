@@ -1,7 +1,4 @@
-use crate::{
-    prelude::*,
-    vec3::{Point3, Vec3},
-};
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Ray {

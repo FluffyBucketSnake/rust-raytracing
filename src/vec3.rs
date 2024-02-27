@@ -1,5 +1,6 @@
 use std::{
     fmt::{Debug, Display},
+    iter::Sum,
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
@@ -13,8 +14,10 @@ pub struct Vec3 {
 pub type Point3 = Vec3;
 
 impl Vec3 {
+    pub const ZERO: Vec3 = Vec3::new(0.0, 0.0, 0.0);
+
     #[inline]
-    pub fn new(x: float, y: float, z: float) -> Self {
+    pub const fn new(x: float, y: float, z: float) -> Self {
         Self { e: [x, y, z] }
     }
 
@@ -196,3 +199,9 @@ impl_element_wise_op_assign!(AddAssign, add_assign);
 impl_element_wise_op_assign!(SubAssign, sub_assign);
 impl_element_wise_op_assign!(MulAssign, mul_assign);
 impl_element_wise_op_assign!(DivAssign, div_assign);
+
+impl Sum for Vec3 {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Vec3::ZERO, |acc, current| acc + current)
+    }
+}

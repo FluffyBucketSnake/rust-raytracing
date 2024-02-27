@@ -37,8 +37,12 @@ impl Interval {
     }
 
     #[inline]
+    pub fn clamp(&self, value: float) -> float {
+        value.clamp(self.min, self.max)
+    }
+
+    #[inline]
     pub fn with_max(self, new_max: float) -> Self {
         Self::new(self.min, new_max)
     }
 }
-

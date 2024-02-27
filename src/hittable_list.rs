@@ -16,11 +16,7 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(
-        &self,
-        ray: &crate::ray::Ray,
-        mut t_interval: Interval,
-    ) -> Option<crate::hittable::HitRecord> {
+    fn hit(&self, ray: &Ray, mut t_interval: Interval) -> Option<crate::hittable::HitRecord> {
         let mut hit_record = None;
         for i in &self.list {
             if let Some(hit) = i.hit(ray, t_interval) {

@@ -3,17 +3,16 @@ mod hittable;
 mod hittable_list;
 mod interval;
 mod prelude;
+mod random;
 mod ray;
 mod sphere;
 mod vec3;
 
 use camera::Camera;
 use hittable_list::HittableList;
+use prelude::*;
 use sphere::Sphere;
 use std::error::Error;
-use vec3::{Point3, Vec3};
-
-type Color = Vec3;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut world = HittableList::new();
@@ -22,7 +21,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
-    let camera = Camera::from_aspect_ratio(image_width, aspect_ratio);
+    let samples_per_pixel = 100;
+    let camera = Camera::from_aspect_ratio(image_width, aspect_ratio, samples_per_pixel);
 
     camera.render(&world)?;
 

@@ -2,8 +2,6 @@ use crate::{
     hittable::{HitRecord, Hittable},
     interval::Interval,
     prelude::*,
-    ray::Ray,
-    vec3::Point3,
 };
 
 pub struct Sphere {

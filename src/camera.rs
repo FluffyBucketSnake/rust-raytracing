@@ -9,6 +9,7 @@ pub struct Camera {
     image_width: usize,
     image_height: usize,
     samples_pex_pixel: usize,
+    max_depth: usize,
     center: Point3,
     top_left_pixel: Point3,
     pixel_du: Vec3,
@@ -20,6 +21,7 @@ impl Camera {
         image_width: usize,
         aspect_ratio: float,
         samples_pex_pixel: usize,
+        max_depth: usize,
     ) -> Self {
         let center = Point3::new(0.0, 0.0, 0.0);
         let focal_length = 1.0;
@@ -43,6 +45,7 @@ impl Camera {
             image_width,
             image_height,
             samples_pex_pixel,
+            max_depth,
             center,
             top_left_pixel,
             pixel_du,
@@ -58,7 +61,7 @@ impl Camera {
         for j in 0..self.image_height {
             for i in 0..self.image_width {
                 let color = (0..self.samples_pex_pixel)
-                    .map(|_| ray_color(&self.get_ray(i, j), world))
+                    .map(|_| ray_color(&self.get_ray(i, j), world, self.max_depth))
                     .sum::<Color>()
                     / (self.samples_pex_pixel as float);
                 write_ppm_pixel(output, color)?;
@@ -85,9 +88,14 @@ impl Camera {
     }
 }
 
-fn ray_color(ray: &Ray, world: &impl Hittable) -> Color {
-    if let Some(hit) = world.hit(&ray, Interval::NOT_NEGATIVE) {
-        return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
+fn ray_color(ray: &Ray, world: &impl Hittable, max_depth: usize) -> Color {
+    if max_depth == 0 {
+        return Color::ZERO;
+    }
+
+    if let Some(hit) = world.hit(&ray, Interval::new(0.001, float::INFINITY)) {
+        let new_direction = Vec3::random_on_hemisphere(&hit.normal);
+        return 0.5 * ray_color(&Ray::new(hit.position, new_direction), world, max_depth - 1);
     }
 
     let direction = ray.direction().unit();

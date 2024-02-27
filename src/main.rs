@@ -22,7 +22,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let samples_per_pixel = 100;
-    let camera = Camera::from_aspect_ratio(image_width, aspect_ratio, samples_per_pixel);
+    let max_depth = 50;
+    let camera = Camera::from_aspect_ratio(image_width, aspect_ratio, samples_per_pixel, max_depth);
 
     camera.render(&world)?;
 

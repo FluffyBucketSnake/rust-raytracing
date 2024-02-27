@@ -14,11 +14,51 @@ pub struct Vec3 {
 pub type Point3 = Vec3;
 
 impl Vec3 {
-    pub const ZERO: Vec3 = Vec3::new(0.0, 0.0, 0.0);
+    pub const ZERO: Vec3 = Vec3::uniform(0.0);
 
     #[inline]
     pub const fn new(x: float, y: float, z: float) -> Self {
         Self { e: [x, y, z] }
+    }
+
+    #[inline]
+    pub const fn uniform(value: float) -> Self {
+        Self::new(value, value, value)
+    }
+
+    #[inline]
+    pub fn random_norm() -> Self {
+        Self::new(rand_norm(), rand_norm(), rand_norm())
+    }
+
+    #[inline]
+    pub fn random(min: float, max: float) -> Self {
+        Self::new(rand(min, max), rand(min, max), rand(min, max))
+    }
+
+    #[inline]
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Self::random(-1.0, 1.0);
+            if p.lenght_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
+
+    #[inline]
+    pub fn random_unit_vector() -> Self {
+        Self::random_in_unit_sphere().unit()
+    }
+
+    #[inline]
+    pub fn random_on_hemisphere(normal: &Vec3) -> Self {
+        let vector = Self::random_unit_vector();
+        if vector.dot(&normal) > 0.0 {
+            vector
+        } else {
+            -vector
+        }
     }
 
     #[inline]

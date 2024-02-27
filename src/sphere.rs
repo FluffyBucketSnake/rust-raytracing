@@ -1,22 +1,23 @@
 use crate::{
     hittable::{HitRecord, Hittable},
+    prelude::*,
     ray::Ray,
     vec3::Point3,
 };
 
 pub struct Sphere {
     center: Point3,
-    radius: f32,
+    radius: float,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, radius: f32) -> Self {
+    pub fn new(center: Point3, radius: float) -> Self {
         Self { center, radius }
     }
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: float, t_max: float) -> Option<HitRecord> {
         let center_to_origin = ray.origin() - self.center;
         let a = ray.direction().lenght_squared();
         let half_b = center_to_origin.dot(&ray.direction());

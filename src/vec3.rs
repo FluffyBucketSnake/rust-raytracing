@@ -3,50 +3,52 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
+use crate::prelude::*;
+
 #[derive(Clone, Copy, Default, Debug)]
 pub struct Vec3 {
-    pub e: [f32; 3],
+    pub e: [float; 3],
 }
 
 pub type Point3 = Vec3;
 
 impl Vec3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
+    pub fn new(x: float, y: float, z: float) -> Self {
         Self { e: [x, y, z] }
     }
 
     #[inline]
-    pub fn x(&self) -> f32 {
+    pub fn x(&self) -> float {
         self.e[0]
     }
 
     #[inline]
-    pub fn y(&self) -> f32 {
+    pub fn y(&self) -> float {
         self.e[1]
     }
 
     #[inline]
-    pub fn z(&self) -> f32 {
+    pub fn z(&self) -> float {
         self.e[2]
     }
 
     #[inline]
-    pub fn r(&self) -> f32 {
+    pub fn r(&self) -> float {
         self.e[0]
     }
 
     #[inline]
-    pub fn g(&self) -> f32 {
+    pub fn g(&self) -> float {
         self.e[1]
     }
 
     #[inline]
-    pub fn b(&self) -> f32 {
+    pub fn b(&self) -> float {
         self.e[2]
     }
 
     #[inline]
-    pub fn dot(&self, other: &Vec3) -> f32 {
+    pub fn dot(&self, other: &Vec3) -> float {
         self.x() * other.x() + self.y() * other.y() + self.z() * other.z()
     }
 
@@ -60,12 +62,12 @@ impl Vec3 {
     }
 
     #[inline]
-    pub fn lenght_squared(&self) -> f32 {
+    pub fn lenght_squared(&self) -> float {
         self.dot(self)
     }
 
     #[inline]
-    pub fn lenght(&self) -> f32 {
+    pub fn lenght(&self) -> float {
         self.dot(self).sqrt()
     }
 
@@ -138,11 +140,11 @@ macro_rules! impl_element_wise_op {
         }
         impl_borrowed!(Vec3, Vec3, $trait, $func);
 
-        impl $trait<f32> for Vec3 {
+        impl $trait<float> for Vec3 {
             type Output = Self;
 
             #[inline]
-            fn $func(self, rhs: f32) -> Self::Output {
+            fn $func(self, rhs: float) -> Self::Output {
                 Self::new(
                     $trait::$func(self.x(), rhs),
                     $trait::$func(self.y(), rhs),
@@ -150,9 +152,9 @@ macro_rules! impl_element_wise_op {
                 )
             }
         }
-        impl_borrowed!(Vec3, f32, $trait, $func);
+        impl_borrowed!(Vec3, float, $trait, $func);
 
-        impl $trait<Vec3> for f32 {
+        impl $trait<Vec3> for float {
             type Output = Vec3;
 
             #[inline]
@@ -160,7 +162,7 @@ macro_rules! impl_element_wise_op {
                 $trait::$func(rhs, self)
             }
         }
-        impl_borrowed!(f32, Vec3, $trait, $func);
+        impl_borrowed!(float, Vec3, $trait, $func);
     };
 }
 

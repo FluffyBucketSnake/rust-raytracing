@@ -1,4 +1,4 @@
-use crate::hittable::Hittable;
+use crate::{hittable::Hittable, prelude::*};
 
 #[derive(Default)]
 pub struct HittableList {
@@ -19,8 +19,8 @@ impl Hittable for HittableList {
     fn hit(
         &self,
         ray: &crate::ray::Ray,
-        t_min: f32,
-        t_max: f32,
+        t_min: float,
+        t_max: float,
     ) -> Option<crate::hittable::HitRecord> {
         let mut hit_record = None;
         let mut closest_t = t_max;

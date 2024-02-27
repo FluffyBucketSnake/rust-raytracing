@@ -1,5 +1,6 @@
 mod hittable;
 mod hittable_list;
+mod prelude;
 mod ray;
 mod sphere;
 mod vec3;
@@ -9,6 +10,7 @@ use std::io::Write;
 
 use hittable::Hittable;
 use hittable_list::HittableList;
+use prelude::*;
 use ray::Ray;
 use sphere::Sphere;
 use vec3::{Point3, Vec3};
@@ -19,9 +21,9 @@ type RenderResult = Result<(), Box<dyn Error>>;
 fn main() -> RenderResult {
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
-    let image_height = ((image_width as f32) / aspect_ratio) as usize;
+    let image_height = ((image_width as float) / aspect_ratio) as usize;
 
-    let real_aspect_ratio = image_width as f32 / image_height as f32;
+    let real_aspect_ratio = image_width as float / image_height as float;
     let viewport_height = 2.0;
     let viewport_width = viewport_height * real_aspect_ratio;
 
@@ -30,8 +32,8 @@ fn main() -> RenderResult {
 
     let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);
     let viewport_v = Vec3::new(0.0, -viewport_height, 0.0);
-    let viewport_du = viewport_u / image_width as f32;
-    let viewport_dv = viewport_v / image_height as f32;
+    let viewport_du = viewport_u / image_width as float;
+    let viewport_dv = viewport_v / image_height as float;
     let viewport_top_left =
         camera_center - Vec3::new(0.0, 0.0, focal_length) - (viewport_u + viewport_v) / 2.0;
     let pixel_top_left = viewport_top_left + 0.5 * (viewport_du + viewport_dv);
@@ -46,7 +48,8 @@ fn main() -> RenderResult {
     write_ppm_header(output, image_width, image_height)?;
     for j in 0..image_height {
         for i in 0..image_width {
-            let pixel_center = pixel_top_left + (i as f32) * viewport_du + (j as f32) * viewport_dv;
+            let pixel_center =
+                pixel_top_left + (i as float) * viewport_du + (j as float) * viewport_dv;
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction);
 
@@ -60,7 +63,7 @@ fn main() -> RenderResult {
 }
 
 fn ray_color(ray: Ray, world: &HittableList) -> Color {
-    if let Some(hit) = world.hit(&ray, 0.0, f32::INFINITY) {
+    if let Some(hit) = world.hit(&ray, 0.0, float::INFINITY) {
         return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
     }
 

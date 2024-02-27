@@ -1,5 +1,6 @@
 mod hittable;
 mod hittable_list;
+mod interval;
 mod prelude;
 mod ray;
 mod sphere;
@@ -10,6 +11,7 @@ use std::io::Write;
 
 use hittable::Hittable;
 use hittable_list::HittableList;
+use interval::Interval;
 use prelude::*;
 use ray::Ray;
 use sphere::Sphere;
@@ -63,7 +65,7 @@ fn main() -> RenderResult {
 }
 
 fn ray_color(ray: Ray, world: &HittableList) -> Color {
-    if let Some(hit) = world.hit(&ray, 0.0, float::INFINITY) {
+    if let Some(hit) = world.hit(&ray, Interval::NOT_NEGATIVE) {
         return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
     }
 

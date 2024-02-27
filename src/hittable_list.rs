@@ -1,4 +1,4 @@
-use crate::{hittable::Hittable, prelude::*};
+use crate::{hittable::Hittable, interval::Interval, prelude::*};
 
 #[derive(Default)]
 pub struct HittableList {
@@ -19,14 +19,12 @@ impl Hittable for HittableList {
     fn hit(
         &self,
         ray: &crate::ray::Ray,
-        t_min: float,
-        t_max: float,
+        mut t_interval: Interval,
     ) -> Option<crate::hittable::HitRecord> {
         let mut hit_record = None;
-        let mut closest_t = t_max;
         for i in &self.list {
-            if let Some(hit) = i.hit(ray, t_min, closest_t) {
-                closest_t = hit.t;
+            if let Some(hit) = i.hit(ray, t_interval) {
+                t_interval = t_interval.with_max(hit.t);
                 hit_record = Some(hit);
             }
         }

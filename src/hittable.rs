@@ -1,4 +1,5 @@
 use crate::{
+    interval::Interval,
     prelude::*,
     ray::Ray,
     vec3::{Point3, Vec3},
@@ -34,5 +35,5 @@ impl HitRecord {
 }
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, t_min: float, t_max: float) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, t_interval: Interval) -> Option<HitRecord>;
 }

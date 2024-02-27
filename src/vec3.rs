@@ -13,6 +13,7 @@ pub struct Vec3 {
 pub type Point3 = Vec3;
 
 impl Vec3 {
+    #[inline]
     pub fn new(x: float, y: float, z: float) -> Self {
         Self { e: [x, y, z] }
     }

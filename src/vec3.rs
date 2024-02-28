@@ -16,6 +16,13 @@ pub type Point3 = Vec3;
 impl Vec3 {
     pub const ZERO: Vec3 = Vec3::uniform(0.0);
 
+    pub const X: Vec3 = Vec3::new(1.0, 0.0, 0.0);
+    pub const NEG_X: Vec3 = Vec3::new(-1.0, 0.0, 0.0);
+    pub const Y: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+    pub const NEG_Y: Vec3 = Vec3::new(0.0, -1.0, 0.0);
+    pub const Z: Vec3 = Vec3::new(0.0, 0.0, 1.0);
+    pub const NEG_Z: Vec3 = Vec3::new(0.0, 0.0, -1.0);
+
     #[inline]
     pub const fn from_array(e: [float; 3]) -> Self {
         Self { e }
@@ -45,6 +52,16 @@ impl Vec3 {
     pub fn random_in_unit_sphere() -> Self {
         loop {
             let p = Self::random(-1.0, 1.0);
+            if p.lenght_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
+
+    #[inline]
+    pub fn random_in_unit_disk() -> Self {
+        loop {
+            let p = Vec3::new(rand(-1.0, 1.0), rand(-1.0, 1.0), 0.0);
             if p.lenght_squared() < 1.0 {
                 return p;
             }
@@ -104,7 +121,7 @@ impl Vec3 {
     #[inline]
     pub fn cross(&self, other: &Vec3) -> Vec3 {
         Self::new(
-            self.y() + other.z() - self.z() * other.y(),
+            self.y() * other.z() - self.z() * other.y(),
             self.z() * other.x() - self.x() * other.z(),
             self.x() * other.y() - self.y() * other.x(),
         )

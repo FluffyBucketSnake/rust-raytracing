@@ -93,9 +93,12 @@ fn ray_color(ray: &Ray, world: &impl Hittable, max_depth: usize) -> Color {
         return Color::ZERO;
     }
 
-    if let Some(hit) = world.hit(&ray, Interval::new(0.001, float::INFINITY)) {
-        let new_direction = hit.normal + Vec3::random_unit_vector();
-        return 0.5 * ray_color(&Ray::new(hit.position, new_direction), world, max_depth - 1);
+    if let Some(hit) = world.hit(ray, Interval::new(0.001, float::INFINITY)) {
+        return hit
+            .material
+            .scatter(ray, &hit)
+            .map(|(attenuation, scatter)| attenuation * ray_color(&scatter, world, max_depth - 1))
+            .unwrap_or(Color::ZERO);
     }
 
     let direction = ray.direction().unit();

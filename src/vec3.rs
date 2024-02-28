@@ -126,6 +126,25 @@ impl Vec3 {
     }
 
     #[inline]
+    pub fn near_zero(&self) -> bool {
+        const EPSILON: float = 1e-8;
+        self.e[0].abs() < EPSILON && self.e[1].abs() < EPSILON && self.e[2].abs() < EPSILON
+    }
+
+    #[inline]
+    pub fn reflect(&self, normal: &Vec3) -> Vec3 {
+        self - 2.0 * self.dot(normal) * normal
+    }
+
+    #[inline]
+    pub fn refract(&self, normal: &Vec3, eta_ratio: float) -> Vec3 {
+        let cos_theta = (-self).dot(normal).min(1.0);
+        let out_ray_perp = eta_ratio * (self + cos_theta * normal);
+        let out_ray_parallel = -((1.0 - out_ray_perp.lenght_squared()).sqrt()) * normal;
+        return out_ray_perp + out_ray_parallel;
+    }
+
+    #[inline]
     pub fn map<F: FnMut(float) -> float>(self, f: F) -> Self {
         Self::from_array(self.e.map(f))
     }
@@ -159,7 +178,16 @@ impl Neg for Vec3 {
     }
 }
 
-macro_rules! impl_borrowed {
+impl Neg for &Vec3 {
+    type Output = Vec3;
+
+    #[inline]
+    fn neg(self) -> Self::Output {
+        Vec3::new(-self.x(), -self.y(), -self.z())
+    }
+}
+
+macro_rules! impl_borrowed_bop {
     ($lhs:ident, $rhs:ident, $trait:ident, $func:ident) => {
         impl $trait<&$rhs> for &$lhs {
             type Output = Vec3;
@@ -204,7 +232,7 @@ macro_rules! impl_element_wise_op {
                 )
             }
         }
-        impl_borrowed!(Vec3, Vec3, $trait, $func);
+        impl_borrowed_bop!(Vec3, Vec3, $trait, $func);
 
         impl $trait<float> for Vec3 {
             type Output = Self;
@@ -218,7 +246,7 @@ macro_rules! impl_element_wise_op {
                 )
             }
         }
-        impl_borrowed!(Vec3, float, $trait, $func);
+        impl_borrowed_bop!(Vec3, float, $trait, $func);
 
         impl $trait<Vec3> for float {
             type Output = Vec3;
@@ -228,7 +256,7 @@ macro_rules! impl_element_wise_op {
                 $trait::$func(rhs, self)
             }
         }
-        impl_borrowed!(float, Vec3, $trait, $func);
+        impl_borrowed_bop!(float, Vec3, $trait, $func);
     };
 }
 

@@ -1,9 +1,12 @@
-use crate::{interval::Interval, prelude::*};
+use std::rc::Rc;
+
+use crate::{interval::Interval, material::Material, prelude::*};
 
 #[derive(Debug)]
 pub struct HitRecord {
     pub t: float,
     pub position: Point3,
+    pub material: Rc<dyn Material>,
     pub normal: Vec3,
     pub front_face: bool,
 }
@@ -12,6 +15,7 @@ impl HitRecord {
     pub fn from_outward_normal(
         t: float,
         position: Point3,
+        material: Rc<dyn Material>,
         outward_normal: Vec3,
         ray: &Ray,
     ) -> Self {
@@ -19,6 +23,7 @@ impl HitRecord {
         Self {
             t,
             position,
+            material,
             front_face,
             normal: if front_face {
                 outward_normal

@@ -64,7 +64,7 @@ impl Camera {
                     .map(|_| ray_color(&self.get_ray(i, j), world, self.max_depth))
                     .sum::<Color>()
                     / (self.samples_pex_pixel as float);
-                write_ppm_pixel(output, color)?;
+                write_ppm_pixel(output, color.gamma_corrected())?;
             }
             let _ = writeln!(log, "Scanline progress: {}/{}", j, self.image_height);
         }
@@ -94,7 +94,7 @@ fn ray_color(ray: &Ray, world: &impl Hittable, max_depth: usize) -> Color {
     }
 
     if let Some(hit) = world.hit(&ray, Interval::new(0.001, float::INFINITY)) {
-        let new_direction = Vec3::random_on_hemisphere(&hit.normal);
+        let new_direction = hit.normal + Vec3::random_unit_vector();
         return 0.5 * ray_color(&Ray::new(hit.position, new_direction), world, max_depth - 1);
     }
 

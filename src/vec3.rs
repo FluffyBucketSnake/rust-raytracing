@@ -17,8 +17,13 @@ impl Vec3 {
     pub const ZERO: Vec3 = Vec3::uniform(0.0);
 
     #[inline]
+    pub const fn from_array(e: [float; 3]) -> Self {
+        Self { e }
+    }
+
+    #[inline]
     pub const fn new(x: float, y: float, z: float) -> Self {
-        Self { e: [x, y, z] }
+        Self::from_array([x, y, z])
     }
 
     #[inline]
@@ -118,6 +123,16 @@ impl Vec3 {
     #[inline]
     pub fn unit(&self) -> Vec3 {
         self / self.lenght()
+    }
+
+    #[inline]
+    pub fn map<F: FnMut(float) -> float>(self, f: F) -> Self {
+        Self::from_array(self.e.map(f))
+    }
+
+    #[inline]
+    pub fn gamma_corrected(self) -> Self {
+        self.map(|c| c.sqrt())
     }
 }
 
